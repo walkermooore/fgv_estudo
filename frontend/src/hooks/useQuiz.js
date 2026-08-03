@@ -1,0 +1,2 @@
+import {useCallback,useState} from 'react';import {quizApi} from '../services/api'
+export function useQuiz(){const[questions,setQuestions]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[last,setLast]=useState(null);const search=useCallback(async(topic,amount=5)=>{setLoading(true);setError('');setLast({topic,amount});try{setQuestions(await quizApi.get(topic,amount))}catch(e){setError(e.message)}finally{setLoading(false)}},[]);return{questions,loading,error,search,retry:()=>last&&search(last.topic,last.amount)}}

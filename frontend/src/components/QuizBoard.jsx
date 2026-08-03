@@ -1,0 +1,1 @@
+import QuestionCard from './QuestionCard';export default function QuizBoard({questions}){if(!questions.length)return <div className="py-16 text-center text-slate-500">Nenhuma questão encontrada.</div>;return <div className="space-y-6">{questions.map((q,i)=><QuestionCard key={q.id} question={q} index={i}/>)}</div>}

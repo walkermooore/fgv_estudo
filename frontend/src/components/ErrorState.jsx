@@ -1,0 +1,1 @@
+import{RefreshCw}from'lucide-react';export default function ErrorState({message,onRetry}){return <div className="panel p-8 text-center"><p className="mb-4 text-rose-600">{message}</p>{onRetry&&<button className="btn-primary" onClick={onRetry}><RefreshCw size={16}/>Tentar novamente</button>}</div>}

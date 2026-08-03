@@ -1,0 +1,2 @@
+import {useCallback,useEffect,useState} from 'react';import {materialApi} from '../services/api'
+export function useMaterials(){const[materials,setMaterials]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState('');const load=useCallback(async(search='')=>{setLoading(true);setError('');try{setMaterials(await materialApi.list(search))}catch(e){setError(e.message)}finally{setLoading(false)}},[]);useEffect(()=>{load()},[load]);return{materials,loading,error,load,setMaterials}}

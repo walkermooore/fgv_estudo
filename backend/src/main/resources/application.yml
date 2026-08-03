@@ -1,0 +1,30 @@
+spring:
+  application.name: fgv-study-hub
+  datasource:
+    url: jdbc:h2:file:./data/studyhub;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+    properties.hibernate.jdbc.time_zone: UTC
+  flyway.locations: classpath:db/migration/common
+  servlet.multipart:
+    max-file-size: 25MB
+    max-request-size: 100MB
+server:
+  port: ${SERVER_PORT:8080}
+  error.include-message: never
+app:
+  cors.allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  storage.path: ${STORAGE_PATH:./data/uploads}
+  ai:
+    api-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    url: ${OPENAI_URL:https://api.openai.com/v1}
+    embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+    timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:90}
+  vector:
+    top-k: 10
+    provider: local
