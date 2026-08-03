@@ -9,7 +9,7 @@ export default function NoticeAnalysis({ notice, onBack }) {
       <button className="btn-ghost mb-6" onClick={onBack}><ArrowLeft size={17} /> Voltar aos editais</button>
 
       <header className="panel p-6 sm:p-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-500">Edital analisado</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-500">Edital analisado · Perfil 3</p>
         <h1 className="mt-2 text-3xl font-black">{notice.title}</h1>
         <div className="mt-5 grid gap-4 text-sm sm:grid-cols-3">
           <Info label="Órgão" value={analysis.organization} />
@@ -50,7 +50,8 @@ export default function NoticeAnalysis({ notice, onBack }) {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 flex items-center gap-2 text-xl font-black"><CheckCircle2 className="text-brand-500" /> Conteúdo programático</h2>
+        <h2 className="mb-1 flex items-center gap-2 text-xl font-black"><CheckCircle2 className="text-brand-500" /> Conteúdo programático</h2>
+        <p className="mb-4 text-sm text-slate-500">Somente Perfil 3 — Desenvolvimento de Software.</p>
         {analysis.contents?.length ? (
           <div className="space-y-4">
             {analysis.contents.map((topic, index) => (

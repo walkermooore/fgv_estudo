@@ -24,6 +24,9 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class ExamNoticeProcessingService {
+    private static final int TARGET_PROFILE = 3;
+    private static final String TARGET_POSITION = "Perfil 3 — Desenvolvimento de Software";
+
     private final ExamNoticeRepository notices;
     private final StudyChunkRepository chunks;
     private final AiGateway ai;
@@ -50,11 +53,15 @@ public class ExamNoticeProcessingService {
             String raw = ai.chat(ExamNoticePrompt.extraction(metadataChunks), properties.ai().noticeModel());
             accumulator.add(parser.parseFirstObject(raw, ExamNoticeAnalysisDTO.class));
             accumulator.addDates(dateExtractor.extract(materialChunks));
-            accumulator.addContents(contentParser.parse(materialChunks));
+            accumulator.addContents(contentParser.parseProfile(materialChunks, TARGET_PROFILE));
             notice.setProcessedBatches(1);
             notices.save(notice);
 
-            notice.setAnalysisJson(objectMapper.writeValueAsString(accumulator.build()));
+            ExamNoticeAnalysisDTO analysis = accumulator.build();
+            notice.setAnalysisJson(objectMapper.writeValueAsString(new ExamNoticeAnalysisDTO(
+                    analysis.organization(), analysis.examiningBoard(), TARGET_POSITION, analysis.summary(),
+                    analysis.dates(), analysis.contents(), analysis.usefulInformation()
+            )));
             notice.setStatus(ExamNoticeStatus.READY);
             notice.setFailureReason(null);
             notice.setProcessedAt(Instant.now());

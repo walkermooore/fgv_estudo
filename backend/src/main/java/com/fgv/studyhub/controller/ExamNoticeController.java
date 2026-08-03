@@ -1,6 +1,7 @@
 package com.fgv.studyhub.controller;
 
 import com.fgv.studyhub.dto.ExamNoticeResponseDTO;
+import com.fgv.studyhub.dto.ProfileTopicsResponseDTO;
 import com.fgv.studyhub.service.ExamNoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,11 @@ public class ExamNoticeController {
     @GetMapping
     public List<ExamNoticeResponseDTO> list() {
         return service.list();
+    }
+
+    @GetMapping("/topics")
+    public ProfileTopicsResponseDTO topics() {
+        return service.profileTopics();
     }
 
     @GetMapping("/{id}")

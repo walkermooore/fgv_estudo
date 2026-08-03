@@ -27,6 +27,23 @@ class ExamNoticeContentParserTest {
                 .anyMatch(subtopic -> subtopic.name().contains("Orientação a objetos") && subtopic.keywords().stream().anyMatch(keyword -> keyword.contains("Encapsulamento")));
     }
 
+    @Test
+    void limitsContentToTheRequestedProfile() {
+        var chunks = List.of(
+                chunk(0, "ANEXO I – CONTEÚDO PROGRAMÁTICO", "ANEXO I – CONTEÚDO PROGRAMÁTICO PERFIL 3: DESENVOLVIMENTO DE SOFTWARE DESENVOLVIMENTO DE SISTEMAS: 1 Java. 2 Spring Boot. TESTES: 1 JUnit. 2 Mockito."),
+                chunk(1, "ANEXO I – CONTEÚDO PROGRAMÁTICO", "DATAPREV CONCURSO PÚBLICO 2026 31 PERFIL 4: INTELIGÊNCIA DA INFORMAÇÃO MATEMÁTICA: 1 Cálculo. 2 Álgebra linear."),
+                chunk(2, "ANEXO I – CONTEÚDO PROGRAMÁTICO", "PERFIL 5: SEGURANÇA CIBERNÉTICA REDES DE COMPUTADORES: 1 TCP/IP. 2 DNS."),
+                chunk(3, "CARGO: ANALISTA", "CARGO: ANALISTA DE TI Requisitos: diploma de graduação.")
+        );
+
+        var result = parser.parseProfile(chunks, 3);
+
+        assertThat(result).isNotEmpty();
+        assertThat(result).allMatch(topic -> topic.topic().toUpperCase().startsWith("PERFIL 3"));
+        assertThat(result).extracting(topic -> topic.topic().toUpperCase())
+                .noneMatch(topic -> topic.contains("MATEMÁTICA") || topic.contains("REDES DE COMPUTADORES"));
+    }
+
     private StudyChunk chunk(int index, String chapter, String content) {
         return StudyChunk.builder().chunkIndex(index).chapter(chapter).content(content).build();
     }

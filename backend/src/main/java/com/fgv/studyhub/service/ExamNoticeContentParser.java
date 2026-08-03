@@ -16,9 +16,19 @@ public class ExamNoticeContentParser {
     private static final Pattern NUMBERED_ITEM = Pattern.compile(
             "(?:^|\\s)(\\d{1,2}(?:\\.\\d{1,2})*)\\s+(.+?)(?=(?:\\s+\\d{1,2}(?:\\.\\d{1,2})*\\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇ])|$)");
     private static final Pattern FIRST_MODULE = Pattern.compile("(?iu)M[ÓO]DULO\\s+[IVX]+\\b");
+    private static final Pattern PROFILE_MARKER = Pattern.compile("(?iu)\\bPERFIL\\s+(\\d{1,2})\\s*:");
 
     public List<ExamNoticeAnalysisDTO.ContentTopic> parse(List<StudyChunk> chunks) {
         String text = programText(chunks);
+        return parseText(text);
+    }
+
+    public List<ExamNoticeAnalysisDTO.ContentTopic> parseProfile(List<StudyChunk> chunks, int profileNumber) {
+        String text = programText(chunks);
+        return parseText(profileText(text, profileNumber));
+    }
+
+    private List<ExamNoticeAnalysisDTO.ContentTopic> parseText(String text) {
         if (text.isBlank()) return List.of();
 
         List<HeadingMatch> headings = headings(text);
@@ -44,6 +54,22 @@ public class ExamNoticeContentParser {
             topics.computeIfAbsent(normalize(topicName), ignored -> new TopicAccumulator(topicName)).add(subtopics);
         }
         return topics.values().stream().map(TopicAccumulator::build).toList();
+    }
+
+    private String profileText(String text, int profileNumber) {
+        Matcher matcher = PROFILE_MARKER.matcher(text);
+        int start = -1;
+        int end = text.length();
+        while (matcher.find()) {
+            int currentProfile = Integer.parseInt(matcher.group(1));
+            if (start < 0 && currentProfile == profileNumber) {
+                start = matcher.start();
+            } else if (start >= 0) {
+                end = matcher.start();
+                break;
+            }
+        }
+        return start < 0 ? "" : text.substring(start, end);
     }
 
     private String programText(List<StudyChunk> chunks) {

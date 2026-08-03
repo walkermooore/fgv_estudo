@@ -21,6 +21,9 @@ import java.util.Locale;
 @RequiredArgsConstructor
 @Slf4j
 public class ExamNoticeRecoveryService {
+    private static final int TARGET_PROFILE = 3;
+    private static final String TARGET_POSITION = "Perfil 3 — Desenvolvimento de Software";
+
     private final ExamNoticeRepository notices;
     private final StudyChunkRepository chunks;
     private final ExamNoticeContentParser contentParser;
@@ -42,9 +45,9 @@ public class ExamNoticeRecoveryService {
         try {
             var materialChunks = chunks.findByMaterialIdOrderByChunkIndex(notice.getMaterial().getId());
             var current = objectMapper.readValue(notice.getAnalysisJson(), ExamNoticeAnalysisDTO.class);
-            var localContents = contentParser.parse(materialChunks);
+            var localContents = contentParser.parseProfile(materialChunks, TARGET_PROFILE);
             var refreshed = new ExamNoticeAnalysisDTO(
-                    current.organization(), current.examiningBoard(), current.position(), current.summary(),
+                    current.organization(), current.examiningBoard(), TARGET_POSITION, current.summary(),
                     mergeDates(current.dates(), dateExtractor.extract(materialChunks)),
                     localContents.isEmpty() ? current.contents() : localContents,
                     current.usefulInformation()

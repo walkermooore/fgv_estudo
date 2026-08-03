@@ -1,6 +1,7 @@
 package com.fgv.studyhub.service;
 
 import com.fgv.studyhub.dto.ExamNoticeResponseDTO;
+import com.fgv.studyhub.dto.ProfileTopicsResponseDTO;
 import com.fgv.studyhub.entity.ExamNotice;
 import com.fgv.studyhub.entity.ExamNoticeStatus;
 import com.fgv.studyhub.exception.BadRequestException;
@@ -12,14 +13,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class ExamNoticeService {
+    private static final int TARGET_PROFILE = 3;
+    private static final String TARGET_PROFILE_NAME = "Desenvolvimento de Software";
+    private static final Pattern PROFILE_PREFIX = Pattern.compile("(?iu)^PERFIL\\s+3\\s*[—–-]\\s*");
+    private static final Pattern POSITION_PREFIX = Pattern.compile("(?iu)^DESENVOLVIMENTO DE SOFTWARE\\s+");
+
     private final ExamNoticeRepository notices;
     private final MaterialService materials;
     private final ExamNoticeProcessingService processing;
@@ -55,6 +63,18 @@ public class ExamNoticeService {
         return notices.findAllByOrderByCreatedAtDesc().stream().map(mapper::toResponse).toList();
     }
 
+    public ProfileTopicsResponseDTO profileTopics() {
+        LinkedHashSet<String> topics = new LinkedHashSet<>();
+        list().stream()
+                .filter(notice -> notice.status() == ExamNoticeStatus.READY && notice.analysis() != null)
+                .filter(notice -> notice.analysis().contents() != null)
+                .flatMap(notice -> notice.analysis().contents().stream())
+                .map(topic -> displayTopic(topic.topic()))
+                .filter(topic -> !topic.isBlank())
+                .forEach(topics::add);
+        return new ProfileTopicsResponseDTO(TARGET_PROFILE, TARGET_PROFILE_NAME, List.copyOf(topics));
+    }
+
     @Transactional(readOnly = true)
     public ExamNoticeResponseDTO get(Long id) {
         return mapper.toResponse(entity(id));
@@ -79,5 +99,10 @@ public class ExamNoticeService {
         CompletableFuture<Void> task = processing.process(id);
         activeTasks.put(id, task);
         task.whenComplete((ignored, error) -> activeTasks.remove(id));
+    }
+
+    private String displayTopic(String topic) {
+        String value = PROFILE_PREFIX.matcher(topic == null ? "" : topic).replaceFirst("").trim();
+        return POSITION_PREFIX.matcher(value).replaceFirst("").trim();
     }
 }
