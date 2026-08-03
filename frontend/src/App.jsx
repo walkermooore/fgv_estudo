@@ -1,14 +1,16 @@
-import { BookOpenCheck, History, Library, Menu, Moon, Sun, X } from 'lucide-react'
+import { ClipboardList, History, Library, Menu, Moon, Sun, Target, X } from 'lucide-react'
 import { useState } from 'react'
 import { useDarkMode } from './hooks/useDarkMode'
 import HistoryPage from './pages/HistoryPage'
 import LibraryPage from './pages/LibraryPage'
+import NoticesPage from './pages/NoticesPage'
 import QuizPage from './pages/QuizPage'
 
 const pages = {
   quiz: QuizPage,
   history: HistoryPage,
-  library: LibraryPage
+  library: LibraryPage,
+  notices: NoticesPage
 }
 
 export default function App() {
@@ -22,42 +24,40 @@ export default function App() {
     setMenu(false)
   }
 
-  const navigation = (
-    <>
-      <button onClick={() => go('quiz')} className={`btn-ghost ${page === 'quiz' ? 'bg-slate-100 dark:bg-slate-800' : ''}`}>
-        Simulados
-      </button>
-      <button onClick={() => go('history')} className={`btn-ghost ${page === 'history' ? 'bg-slate-100 dark:bg-slate-800' : ''}`}>
-        <History size={17} /> Histórico
-      </button>
-      <button onClick={() => go('library')} className={`btn-ghost ${page === 'library' ? 'bg-slate-100 dark:bg-slate-800' : ''}`}>
-        <Library size={17} /> Biblioteca
-      </button>
-    </>
+  const navItem = (key, label, Icon) => (
+    <button key={key} onClick={() => go(key)} className={`btn-ghost w-full justify-start md:w-auto ${page === key ? 'bg-slate-100 dark:bg-slate-800' : ''}`}>
+      {Icon && <Icon size={17} />} {label}
+    </button>
   )
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
-          <button onClick={() => go('quiz')} className="flex items-center gap-2 font-black">
-            <span className="rounded-xl bg-brand-600 p-2 text-white"><BookOpenCheck size={20} /></span>
-            FGV <span className="text-brand-500">Study Hub</span>
+          <button onClick={() => go('quiz')} className="flex items-center gap-2 text-lg font-black" aria-label="Ir para o início do Simula+">
+            <span className="rounded-xl bg-brand-600 p-2 text-white"><Target size={21} /></span>
+            <span>Simula<span className="text-brand-500">+</span></span>
           </button>
-          <nav className="ml-auto hidden items-center gap-1 sm:flex">
-            {navigation}
+          <nav className="ml-auto hidden items-center gap-1 md:flex">
+            {navItem('quiz', 'Simulados')}
+            {navItem('history', 'Histórico', History)}
+            {navItem('library', 'Biblioteca', Library)}
+            {navItem('notices', 'Editais', ClipboardList)}
             <button aria-label="Alternar tema" className="btn-ghost" onClick={() => setDark(!dark)}>
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </nav>
-          <button aria-label="Abrir menu" className="btn-ghost ml-auto sm:hidden" onClick={() => setMenu(!menu)}>
+          <button aria-label="Abrir menu" className="btn-ghost ml-auto md:hidden" onClick={() => setMenu(!menu)}>
             {menu ? <X /> : <Menu />}
           </button>
         </div>
         {menu && (
-          <nav className="space-y-2 border-t border-slate-200 p-4 dark:border-slate-800 sm:hidden">
-            {navigation}
-            <button className="btn-ghost w-full" onClick={() => setDark(!dark)}>Alternar tema</button>
+          <nav className="space-y-2 border-t border-slate-200 p-4 dark:border-slate-800 md:hidden">
+            {navItem('quiz', 'Simulados')}
+            {navItem('history', 'Histórico', History)}
+            {navItem('library', 'Biblioteca', Library)}
+            {navItem('notices', 'Editais', ClipboardList)}
+            <button className="btn-ghost w-full justify-start" onClick={() => setDark(!dark)}>Alternar tema</button>
           </nav>
         )}
       </header>

@@ -1,6 +1,6 @@
 # Prompt para o Lovable
 
-Crie um frontend completo e responsivo para uma plataforma de estudos chamada **FGV Study Hub**. O backend já existe; não crie nem simule um novo backend. Use **React 18+, Vite, Tailwind CSS, Axios e Lucide React**.
+Crie um frontend completo e responsivo para uma plataforma de estudos chamada **Simula+**. O backend já existe; não crie nem simule um novo backend. Use **React 18+, Vite, Tailwind CSS, Axios e Lucide React**.
 
 ## Direção visual
 
@@ -10,16 +10,18 @@ Use fundo off-white ou cinza muito claro, cartões brancos com bordas sutis, tip
 
 ## Estrutura
 
-Crie um cabeçalho compacto e fixo com o nome “FGV Study Hub” e três áreas principais:
+Crie um cabeçalho compacto e fixo com o nome “Simula+”, usando um ícone de alvo simples e elegante. Use o mesmo símbolo como favicon da aba do navegador. Crie quatro áreas principais:
 
 1. **Simulados**
 2. **Histórico**
 3. **Biblioteca**
+4. **Editais**
 
 No mobile, use menu compacto. Use estados completos de loading, skeleton, vazio e erro com botão para tentar novamente. Garanta navegação por teclado, contraste adequado, foco visível e `aria-label` nos botões de ícone.
 
 ## Página Simulados
 
+- Mantenha a abertura simples: título “Crie seu simulado” e uma frase curta. Não use o texto “Domine qualquer assunto”, selos sobre IA ou uma hero section alta.
 - Campo de busca central com placeholder “Digite um assunto...”.
 - Seletor simples da quantidade de questões.
 - Exemplos discretos: Docker, Java, Spring Security, RabbitMQ e Crase.
@@ -163,6 +165,84 @@ APIs principais:
 - `POST /api/materials/mindmap`
 - `POST /api/materials/questions`
 - `POST /api/materials/notes`
+
+## Página Editais
+
+Crie uma área própria para enviar e organizar editais. O edital enviado também será armazenado automaticamente na Biblioteca. No topo, use o título “Organize seu edital” e uma explicação curta.
+
+Inclua:
+
+- campo opcional para o nome do edital;
+- upload de um arquivo por vez;
+- formatos PDF, DOCX, TXT, Markdown e HTML;
+- botão “Enviar edital”;
+- progresso do upload;
+- informação discreta de que a análise local acontece em segundo plano e pode levar vários minutos;
+- lista dos editais já enviados, do mais recente para o mais antigo;
+- status `PROCESSING`, `READY` e `FAILED` apresentados em português;
+- barra de progresso calculada com `processedBatches`, `totalBatches` e `progressPercentage`;
+- atualização automática a cada cinco segundos enquanto existir algum edital em processamento;
+- opção de excluir apenas quando não estiver processando.
+
+Quando a análise estiver pronta, crie uma página de detalhes bem organizada com:
+
+- nome do edital;
+- órgão;
+- banca examinadora;
+- cargo;
+- resumo geral;
+- seção de datas e prazos;
+- seção de informações úteis, incluindo inscrição, taxas, vagas, requisitos, etapas e regras quando existirem;
+- conteúdo programático agrupado por tópico;
+- subconteúdos dentro de cada tópico;
+- palavras-chave de cada subconteúdo apresentadas como etiquetas discretas.
+
+Não invente informações no frontend e não complete campos vazios com conhecimento próprio. Mostre “Não identificado” quando o backend não encontrar órgão, banca ou cargo.
+
+APIs:
+
+- `POST /api/notices/upload` como `multipart/form-data`, com `file` obrigatório e `title` opcional;
+- `GET /api/notices`;
+- `GET /api/notices/{id}`;
+- `DELETE /api/notices/{id}`.
+
+Formato principal da resposta:
+
+```json
+{
+  "id": 1,
+  "materialId": 20,
+  "title": "Concurso SEFAZ 2026",
+  "fileName": "edital.pdf",
+  "status": "READY",
+  "processedBatches": 8,
+  "totalBatches": 8,
+  "progressPercentage": 100,
+  "failureReason": null,
+  "createdAt": "2026-08-03T15:00:00Z",
+  "processedAt": "2026-08-03T15:30:00Z",
+  "analysis": {
+    "organization": "Secretaria de Estado de Fazenda",
+    "examiningBoard": "FGV",
+    "position": "Auditor Fiscal",
+    "summary": "Resumo extraído do edital.",
+    "dates": [
+      {"label": "Inscrições", "date": "01/09/2026 a 30/09/2026", "details": "Inscrição pela internet."}
+    ],
+    "contents": [
+      {
+        "topic": "Tecnologia da Informação",
+        "subtopics": [
+          {"name": "Segurança da Informação", "keywords": ["JWT", "OAuth 2.0", "criptografia"]}
+        ]
+      }
+    ],
+    "usefulInformation": [
+      {"category": "Taxa", "title": "Taxa de inscrição", "details": "R$ 150,00"}
+    ]
+  }
+}
+```
 
 ## Requisitos técnicos
 

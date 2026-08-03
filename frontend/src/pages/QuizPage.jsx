@@ -1,2 +1,24 @@
-import SearchBar from'../components/SearchBar';import QuizBoard from'../components/QuizBoard';import Spinner from'../components/Spinner';import ErrorState from'../components/ErrorState';import{useQuiz}from'../hooks/useQuiz';
-export default function QuizPage(){const q=useQuiz();return <main><section className="px-4 pb-14 pt-16 text-center"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">IA LOCAL · SEM CUSTO POR USO</span><h1 className="mx-auto mt-5 max-w-3xl text-4xl font-black tracking-tight md:text-6xl">Domine qualquer assunto no estilo <span className="text-brand-500">FGV</span>.</h1><p className="mx-auto mb-10 mt-5 max-w-xl text-slate-500">Simulados difíceis gerados no seu computador, explicados alternativa por alternativa e guardados no banco local.</p><SearchBar onSearch={q.search} loading={q.loading}/></section><section className="mx-auto max-w-4xl px-4 pb-20">{q.loading&&<><div className="panel h-56 animate-pulse bg-slate-100 dark:bg-slate-900"/><Spinner label="O modelo local está preparando seu simulado..."/></>}{q.error&&<ErrorState message={q.error} onRetry={q.retry}/>} {!q.loading&&!q.error&&<QuizBoard questions={q.questions}/>}</section></main>}
+import ErrorState from '../components/ErrorState'
+import QuizBoard from '../components/QuizBoard'
+import SearchBar from '../components/SearchBar'
+import Spinner from '../components/Spinner'
+import { useQuiz } from '../hooks/useQuiz'
+
+export default function QuizPage() {
+  const quiz = useQuiz()
+
+  return (
+    <main>
+      <section className="px-4 pb-10 pt-12 text-center sm:pt-16">
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Crie seu simulado</h1>
+        <p className="mx-auto mb-8 mt-3 max-w-lg text-slate-500">Digite um assunto e escolha quantas questões deseja responder.</p>
+        <SearchBar onSearch={quiz.search} loading={quiz.loading} />
+      </section>
+      <section className="mx-auto max-w-4xl px-4 pb-20">
+        {quiz.loading && <><div className="panel h-56 animate-pulse bg-slate-100 dark:bg-slate-900" /><Spinner label="Preparando seu simulado..." /></>}
+        {quiz.error && <ErrorState message={quiz.error} onRetry={quiz.retry} />}
+        {!quiz.loading && !quiz.error && <QuizBoard questions={quiz.questions} />}
+      </section>
+    </main>
+  )
+}

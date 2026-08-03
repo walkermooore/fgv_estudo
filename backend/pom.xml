@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.5</version><relativePath/></parent>
-    <groupId>com.fgv</groupId><artifactId>study-hub</artifactId><version>1.0.0</version><name>FGV Question Generator &amp; AI Study Hub</name>
+    <groupId>com.fgv</groupId><artifactId>study-hub</artifactId><version>1.0.0</version><name>Simula+</name>
     <properties><java.version>17</java.version><langchain4j.version>0.36.2</langchain4j.version></properties>
     <dependencies>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>

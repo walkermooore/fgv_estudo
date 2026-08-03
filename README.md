@@ -1,4 +1,4 @@
-# FGV Question Generator + AI Study Hub
+# Simula+
 
 Plataforma full stack para gerar simulados FGV com cache local e construir uma biblioteca pessoal RAG. A IA padrão é **100% local e gratuita**, executada pelo Ollama. O backend nunca expõe entidades e centraliza IA no `AiGateway`, implementado com `WebClient`. O modo local usa H2 em compatibilidade PostgreSQL e similaridade vetorial em Java; o perfil `postgres` ativa PostgreSQL/PgVector e índice HNSW.
 
@@ -57,6 +57,7 @@ O Compose sobe PostgreSQL, PgVector, Ollama, baixa os modelos e inicia a aplica�
 - `POST /api/materials/upload`, `POST /api/materials/url`, `GET/DELETE /api/materials/{id}`
 - `POST /api/study/query`
 - `POST /api/materials/summarize|explain|flashcards|mindmap|questions|notes`
+- `POST /api/notices/upload`, `GET /api/notices`, `GET/DELETE /api/notices/{id}`
 
 O gerador de resumos aceita um ou vários documentos e um pedido personalizado. Exemplo: `{"materialIds":[1,2],"type":"TECHNICAL","request":"Resuma autenticação e compare as abordagens."}`. A resposta usa exclusivamente trechos dos materiais selecionados.
 

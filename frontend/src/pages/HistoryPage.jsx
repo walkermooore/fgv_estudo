@@ -1,4 +1,4 @@
-import { BookOpenCheck, ChevronLeft, ChevronRight, History } from 'lucide-react'
+import { ChevronLeft, ChevronRight, History } from 'lucide-react'
 import ErrorState from '../components/ErrorState'
 import HistoryCard from '../components/HistoryCard'
 import Spinner from '../components/Spinner'
@@ -31,7 +31,7 @@ export default function HistoryPage() {
 
       {!history.loading && !history.error && history.items.length === 0 && (
         <section className="panel py-20 text-center">
-          <BookOpenCheck className="mx-auto mb-4 text-slate-300" size={42} />
+          <History className="mx-auto mb-4 text-slate-300" size={42} />
           <h2 className="text-lg font-bold">Nenhuma questão respondida ainda</h2>
           <p className="mt-2 text-sm text-slate-500">Suas próximas respostas aparecerão aqui automaticamente.</p>
         </section>
