@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 @Service @RequiredArgsConstructor
 public class QuestionService {
- private final TopicRepository topics; private final QuestionRepository questions; private final AiGeneratorService generator; private final QuestionMapper mapper;
+ private final TopicRepository topics; private final QuestionRepository questions; private final AiGeneratorService generator; private final QuestionMapper mapper; private final AnswerHistoryService history;
  @Transactional
  public synchronized List<QuestionResponseDTO> getOrGenerateQuestions(String topicName){return getOrGenerateQuestions(topicName,5);}
  @Transactional
@@ -22,9 +22,11 @@ public class QuestionService {
   return questions.findByTopicIdOrderByCreatedAtAsc(topic.getId(),PageRequest.of(0,amount)).stream().map(q->mapper.toResponse(q,false)).toList();
  }
  @Transactional(readOnly=true) public List<QuestionResponseDTO> random(int amount){if(amount<1||amount>100)throw new BadRequestException("Amount must be between 1 and 100");return questions.findRandom(amount).stream().map(q->mapper.toResponse(q,false)).toList();}
- @Transactional(readOnly=true) public QuizSubmissionResponseDTO submit(List<AnswerDTO> answers){
+ @Transactional public QuizSubmissionResponseDTO submit(List<AnswerDTO> answers){
   if(answers==null||answers.isEmpty())throw new BadRequestException("At least one answer is required"); var ids=answers.stream().map(AnswerDTO::id).toList();var found=questions.findAllById(ids).stream().collect(java.util.stream.Collectors.toMap(Question::getId,q->q));
-  var results=answers.stream().map(a->{var q=Optional.ofNullable(found.get(a.id())).orElseThrow(()->new NotFoundException("Question "+a.id()+" not found"));boolean correct=a.answer()==q.getCorrectIndex();return new AnswerResultDTO(q.getId(),a.answer(),q.getCorrectIndex(),correct,q.getExplanation());}).toList();int score=(int)results.stream().filter(AnswerResultDTO::correct).count();return new QuizSubmissionResponseDTO(score,Math.round(score*10000.0/results.size())/100.0,score,results.size()-score,results);
+  var results=new ArrayList<AnswerResultDTO>();
+  for(var answer:answers){var question=Optional.ofNullable(found.get(answer.id())).orElseThrow(()->new NotFoundException("Question "+answer.id()+" not found"));boolean correct=answer.answer()==question.getCorrectIndex();history.record(question,answer.answer(),correct);results.add(new AnswerResultDTO(question.getId(),answer.answer(),question.getCorrectIndex(),correct,question.getExplanation()));}
+  int score=(int)results.stream().filter(AnswerResultDTO::correct).count();return new QuizSubmissionResponseDTO(score,Math.round(score*10000.0/results.size())/100.0,score,results.size()-score,results);
  }
  private String normalize(String value){return value.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+"," ");}
  private String cleanName(String value){return value.trim().replaceAll("\\s+"," ");}

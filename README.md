@@ -53,6 +53,7 @@ O Compose sobe PostgreSQL, PgVector, Ollama, baixa os modelos e inicia a aplica�
 ## Endpoints
 
 - `GET /api/quiz?topic=Java&amount=20`, `GET /api/random?amount=20`, `POST /api/quiz/submit`
+- `GET /api/history?page=0&size=20` para consultar as questões respondidas
 - `POST /api/materials/upload`, `POST /api/materials/url`, `GET/DELETE /api/materials/{id}`
 - `POST /api/study/query`
 - `POST /api/materials/summarize|explain|flashcards|mindmap|questions|notes`
@@ -64,3 +65,5 @@ Uploads aceitos: PDF, DOCX, TXT, Markdown, CSV e HTML, até 25 MB por arquivo. U
 Por padrão: `AI_PROVIDER=ollama`, `AI_URL=http://localhost:11434`, `AI_MODEL=qwen3:4b-instruct`, `AI_EMBEDDING_MODEL=embeddinggemma` e `AI_TIMEOUT_SECONDS=1800`. Também existem `STORAGE_PATH`, `CORS_ALLOWED_ORIGINS` e, no perfil PostgreSQL, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`. Em máquinas apenas com CPU, o primeiro simulado de cinco questões pode levar vários minutos; o cache torna as próximas consultas imediatas.
 
 OpenAI permanece opcional para quem quiser: configure `AI_PROVIDER=openai`, `AI_URL=https://api.openai.com/v1`, `AI_MODEL`, `AI_EMBEDDING_MODEL` e `OPENAI_API_KEY`.
+
+O prompt completo para redesenhar a interface no Lovable está em [`docs/lovable-frontend-prompt.md`](docs/lovable-frontend-prompt.md).
