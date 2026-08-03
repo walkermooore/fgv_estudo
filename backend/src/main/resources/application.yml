@@ -20,11 +20,12 @@ app:
   cors.allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   storage.path: ${STORAGE_PATH:./data/uploads}
   ai:
+    provider: ${AI_PROVIDER:ollama}
     api-key: ${OPENAI_API_KEY:}
-    model: ${OPENAI_MODEL:gpt-4o-mini}
-    url: ${OPENAI_URL:https://api.openai.com/v1}
-    embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
-    timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:90}
+    model: ${AI_MODEL:${OPENAI_MODEL:qwen3:4b-instruct}}
+    url: ${AI_URL:${OPENAI_URL:http://localhost:11434}}
+    embedding-model: ${AI_EMBEDDING_MODEL:${OPENAI_EMBEDDING_MODEL:embeddinggemma}}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:${OPENAI_TIMEOUT_SECONDS:1800}}
   vector:
     top-k: 10
     provider: local

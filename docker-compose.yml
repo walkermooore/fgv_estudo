@@ -12,14 +12,41 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+    ports: ["11434:11434"]
+    volumes: ["ollama:/root/.ollama"]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  ollama-models:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull qwen3:4b-instruct && ollama pull embeddinggemma"]
+    depends_on:
+      ollama: {condition: service_healthy}
+    restart: "no"
   backend:
     build: ./backend
-    env_file: .env
     environment:
       SPRING_PROFILES_ACTIVE: postgres
+      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/studyhub}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-studyhub}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-studyhub}
+      AI_PROVIDER: ollama
+      AI_URL: http://ollama:11434
+      AI_MODEL: qwen3:4b-instruct
+      AI_EMBEDDING_MODEL: embeddinggemma
     ports: ["8080:8080"]
     depends_on:
       postgres: {condition: service_healthy}
+      ollama-models: {condition: service_completed_successfully}
     volumes: ["uploads:/app/data/uploads"]
   frontend:
     build: ./frontend
@@ -28,3 +55,4 @@ services:
 volumes:
   pgdata:
   uploads:
+  ollama:

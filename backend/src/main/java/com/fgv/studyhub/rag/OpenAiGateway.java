@@ -4,13 +4,14 @@ import com.fgv.studyhub.config.AppProperties;
 import com.fgv.studyhub.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
-@Component @RequiredArgsConstructor
+@Component @ConditionalOnProperty(name="app.ai.provider",havingValue="openai") @RequiredArgsConstructor
 public class OpenAiGateway implements AiGateway {
  private final WebClient aiWebClient; private final AppProperties p; private final ObjectMapper mapper;
  public String chat(String prompt){
