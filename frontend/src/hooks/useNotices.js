@@ -39,5 +39,10 @@ export function useNotices() {
     setNotices(current => current.filter(notice => notice.id !== id))
   }
 
-  return { notices, loading, error, load, upload, remove }
+  async function retry(id) {
+    const updated = await noticeApi.retry(id)
+    setNotices(current => current.map(notice => notice.id === id ? updated : notice))
+  }
+
+  return { notices, loading, error, load, upload, remove, retry }
 }

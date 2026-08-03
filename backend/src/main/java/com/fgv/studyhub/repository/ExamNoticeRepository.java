@@ -1,6 +1,7 @@
 package com.fgv.studyhub.repository;
 
 import com.fgv.studyhub.entity.ExamNotice;
+import com.fgv.studyhub.entity.ExamNoticeStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,6 +10,8 @@ import java.util.List;
 public interface ExamNoticeRepository extends JpaRepository<ExamNotice, Long> {
     @EntityGraph(attributePaths = "material")
     List<ExamNotice> findAllByOrderByCreatedAtDesc();
+
+    List<ExamNotice> findByStatus(ExamNoticeStatus status);
 
     @Override
     @EntityGraph(attributePaths = "material")

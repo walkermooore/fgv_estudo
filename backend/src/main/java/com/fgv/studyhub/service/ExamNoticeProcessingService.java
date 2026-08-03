@@ -2,6 +2,7 @@ package com.fgv.studyhub.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fgv.studyhub.dto.ExamNoticeAnalysisDTO;
+import com.fgv.studyhub.config.AppProperties;
 import com.fgv.studyhub.entity.ExamNotice;
 import com.fgv.studyhub.entity.ExamNoticeStatus;
 import com.fgv.studyhub.entity.StudyChunk;
@@ -18,37 +19,40 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 public class ExamNoticeProcessingService {
-    private static final int CHUNKS_PER_BATCH = 6;
-
     private final ExamNoticeRepository notices;
     private final StudyChunkRepository chunks;
     private final AiGateway ai;
     private final JsonResponseParser parser;
     private final ObjectMapper objectMapper;
+    private final AppProperties properties;
+    private final ExamNoticeChunkSelector selector;
+    private final ExamNoticeContentParser contentParser;
+    private final ExamNoticeDateExtractor dateExtractor;
 
     @Async("noticeTaskExecutor")
-    public void process(Long noticeId) {
+    public CompletableFuture<Void> process(Long noticeId) {
         try {
             ExamNotice notice = find(noticeId);
             List<StudyChunk> materialChunks = chunks.findByMaterialIdOrderByChunkIndex(notice.getMaterial().getId());
             if (materialChunks.isEmpty()) throw new AiServiceException("The exam notice has no processed text");
 
-            List<List<StudyChunk>> batches = partition(materialChunks);
-            notice.setTotalBatches(batches.size());
+            notice.setTotalBatches(1);
             notice.setProcessedBatches(0);
             notices.save(notice);
 
             AnalysisAccumulator accumulator = new AnalysisAccumulator();
-            for (int index = 0; index < batches.size(); index++) {
-                String raw = ai.chat(ExamNoticePrompt.extraction(batches.get(index)));
-                accumulator.add(parser.parseFirstObject(raw, ExamNoticeAnalysisDTO.class));
-                notice.setProcessedBatches(index + 1);
-                notices.save(notice);
-            }
+            List<StudyChunk> metadataChunks = selector.select(materialChunks);
+            String raw = ai.chat(ExamNoticePrompt.extraction(metadataChunks), properties.ai().noticeModel());
+            accumulator.add(parser.parseFirstObject(raw, ExamNoticeAnalysisDTO.class));
+            accumulator.addDates(dateExtractor.extract(materialChunks));
+            accumulator.addContents(contentParser.parse(materialChunks));
+            notice.setProcessedBatches(1);
+            notices.save(notice);
 
             notice.setAnalysisJson(objectMapper.writeValueAsString(accumulator.build()));
             notice.setStatus(ExamNoticeStatus.READY);
@@ -58,14 +62,7 @@ public class ExamNoticeProcessingService {
         } catch (Exception exception) {
             fail(noticeId, exception);
         }
-    }
-
-    private List<List<StudyChunk>> partition(List<StudyChunk> source) {
-        List<List<StudyChunk>> batches = new ArrayList<>();
-        for (int start = 0; start < source.size(); start += CHUNKS_PER_BATCH) {
-            batches.add(source.subList(start, Math.min(source.size(), start + CHUNKS_PER_BATCH)));
-        }
-        return batches;
+        return CompletableFuture.completedFuture(null);
     }
 
     private ExamNotice find(Long id) {
@@ -110,6 +107,21 @@ public class ExamNoticeProcessingService {
                 if (topic == null || blank(topic.topic())) return;
                 topics.computeIfAbsent(normalize(topic.topic()), ignored -> new TopicAccumulator(topic.topic()))
                         .add(topic.subtopics());
+            });
+        }
+
+        void addContents(List<ExamNoticeAnalysisDTO.ContentTopic> contents) {
+            safe(contents).forEach(topic -> {
+                if (topic == null || blank(topic.topic())) return;
+                topics.computeIfAbsent(normalize(topic.topic()), ignored -> new TopicAccumulator(topic.topic()))
+                        .add(topic.subtopics());
+            });
+        }
+
+        void addDates(List<ExamNoticeAnalysisDTO.DateItem> values) {
+            safe(values).forEach(item -> {
+                if (item == null || allBlank(item.label(), item.date(), item.details())) return;
+                dates.putIfAbsent(key(item.label(), item.date()), item);
             });
         }
 

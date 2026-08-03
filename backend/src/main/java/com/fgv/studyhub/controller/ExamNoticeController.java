@@ -35,6 +35,11 @@ public class ExamNoticeController {
         return service.get(id);
     }
 
+    @PostMapping("/{id}/retry")
+    public ExamNoticeResponseDTO retry(@PathVariable Long id) {
+        return service.retry(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

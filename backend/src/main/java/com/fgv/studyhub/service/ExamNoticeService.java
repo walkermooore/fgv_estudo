@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class ExamNoticeService {
     private final MaterialService materials;
     private final ExamNoticeProcessingService processing;
     private final ExamNoticeMapper mapper;
+    private final ConcurrentMap<Long, CompletableFuture<Void>> activeTasks = new ConcurrentHashMap<>();
 
     public ExamNoticeResponseDTO upload(MultipartFile file, String title) {
         var materialResponse = materials.upload(file, title, "Edital enviado pela área de editais");
@@ -28,7 +32,21 @@ public class ExamNoticeService {
                 .material(materials.entity(materialResponse.id()))
                 .status(ExamNoticeStatus.PROCESSING)
                 .build());
-        processing.process(notice.getId());
+        startProcessing(notice.getId());
+        return mapper.toResponse(notice);
+    }
+
+    public ExamNoticeResponseDTO retry(Long id) {
+        var notice = entity(id);
+        if (notice.getStatus() == ExamNoticeStatus.PROCESSING) throw new BadRequestException("The exam notice is already being analyzed");
+        notice.setStatus(ExamNoticeStatus.PROCESSING);
+        notice.setProcessedBatches(0);
+        notice.setTotalBatches(0);
+        notice.setAnalysisJson(null);
+        notice.setFailureReason(null);
+        notice.setProcessedAt(null);
+        notices.save(notice);
+        startProcessing(id);
         return mapper.toResponse(notice);
     }
 
@@ -45,9 +63,8 @@ public class ExamNoticeService {
     @Transactional
     public void delete(Long id) {
         var notice = entity(id);
-        if (notice.getStatus() == ExamNoticeStatus.PROCESSING) {
-            throw new BadRequestException("Wait for the exam notice analysis to finish before deleting it");
-        }
+        var task = activeTasks.remove(id);
+        if (task != null) task.cancel(true);
         Long materialId = notice.getMaterial().getId();
         notices.delete(notice);
         notices.flush();
@@ -56,5 +73,11 @@ public class ExamNoticeService {
 
     private ExamNotice entity(Long id) {
         return notices.findById(id).orElseThrow(() -> new NotFoundException("Exam notice " + id + " not found"));
+    }
+
+    private void startProcessing(Long id) {
+        CompletableFuture<Void> task = processing.process(id);
+        activeTasks.put(id, task);
+        task.whenComplete((ignored, error) -> activeTasks.remove(id));
     }
 }

@@ -23,8 +23,13 @@ public class OllamaGateway implements AiGateway {
 
     @Override
     public String chat(String prompt) {
+        return chat(prompt, properties.ai().model());
+    }
+
+    @Override
+    public String chat(String prompt, String model) {
         Map<String, Object> body = Map.of(
-                "model", properties.ai().model(),
+                "model", model,
                 "stream", false,
                 "think", false,
                 "messages", List.of(Map.of("role", "user", "content", prompt)),

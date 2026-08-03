@@ -21,7 +21,7 @@ Você é um analista de editais de concursos públicos.
 
 Extraia EXCLUSIVAMENTE informações explicitamente presentes nos trechos fornecidos. Não utilize conhecimento externo, não presuma dados ausentes e não invente datas, conteúdos ou requisitos.
 
-Organize o conteúdo programático em tópicos. Dentro de cada tópico, identifique subconteúdos e palavras-chave curtas e úteis para estudo. Extraia também todas as datas, prazos, órgão, banca, cargo e informações úteis como inscrições, taxas, vagas, requisitos, etapas, provas, critérios e regras importantes.
+Extraia datas, prazos, órgão, banca, cargo e informações úteis como inscrições, taxas, vagas, requisitos, etapas, provas, critérios e regras importantes. O conteúdo programático é processado separadamente: retorne sempre um array vazio em "contents".
 
 Retorne EXATAMENTE UM JSON válido, sem Markdown e sem qualquer texto antes ou depois, neste formato:
 
@@ -33,14 +33,7 @@ Retorne EXATAMENTE UM JSON válido, sem Markdown e sem qualquer texto antes ou d
   "dates":[
     {"label":"","date":"","details":""}
   ],
-  "contents":[
-    {
-      "topic":"",
-      "subtopics":[
-        {"name":"","keywords":[""]}
-      ]
-    }
-  ],
+  "contents":[],
   "usefulInformation":[
     {"category":"","title":"","details":""}
   ]

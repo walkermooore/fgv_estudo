@@ -28,7 +28,7 @@ services:
     environment:
       OLLAMA_HOST: http://ollama:11434
     entrypoint: ["/bin/sh", "-c"]
-    command: ["ollama pull qwen3:4b-instruct && ollama pull embeddinggemma"]
+    command: ["ollama pull qwen3:4b-instruct && ollama pull qwen3:1.7b && ollama pull embeddinggemma"]
     depends_on:
       ollama: {condition: service_healthy}
     restart: "no"
@@ -42,6 +42,7 @@ services:
       AI_PROVIDER: ollama
       AI_URL: http://ollama:11434
       AI_MODEL: qwen3:4b-instruct
+      AI_NOTICE_MODEL: qwen3:1.7b
       AI_EMBEDDING_MODEL: embeddinggemma
     ports: ["8080:8080"]
     depends_on:

@@ -1,4 +1,4 @@
-import { FileSearch, FileText, Trash2, UploadCloud } from 'lucide-react'
+import { FileSearch, FileText, RefreshCw, Trash2, UploadCloud } from 'lucide-react'
 import { useRef, useState } from 'react'
 import ErrorState from '../components/ErrorState'
 import NoticeAnalysis from '../components/NoticeAnalysis'
@@ -34,9 +34,19 @@ export default function NoticesPage() {
   }
 
   async function remove(notice) {
-    if (!confirm(`Excluir a análise e o material “${notice.title}”?`)) return
+    const action = notice.status === 'PROCESSING' ? 'Cancelar o processamento e excluir' : 'Excluir'
+    if (!confirm(`${action} a análise e o material “${notice.title}”?`)) return
     try {
       await data.remove(notice.id)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
+  async function retry(notice) {
+    setError('')
+    try {
+      await data.retry(notice.id)
     } catch (requestError) {
       setError(requestError.message)
     }
@@ -97,7 +107,10 @@ export default function NoticesPage() {
                   )}
                   {notice.status === 'FAILED' && <p className="mt-2 text-sm text-rose-500">{notice.failureReason}</p>}
                 </button>
-                {notice.status !== 'PROCESSING' && <button aria-label="Excluir edital" className="btn-ghost text-rose-500" onClick={() => remove(notice)}><Trash2 size={17} /></button>}
+                <div className="flex items-center gap-1">
+                  {notice.status === 'FAILED' && <button className="btn-ghost" onClick={() => retry(notice)}><RefreshCw size={17} /> Tentar novamente</button>}
+                  <button aria-label={notice.status === 'PROCESSING' ? 'Cancelar e excluir edital' : 'Excluir edital'} className="btn-ghost text-rose-500" onClick={() => remove(notice)}><Trash2 size={17} /></button>
+                </div>
               </article>
             ))}
           </div>

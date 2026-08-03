@@ -9,6 +9,7 @@ Pré-requisitos: JDK 17+, Maven 3.9+, Node 20+ e Ollama.
 ```bash
 ollama serve
 ollama pull qwen3:4b-instruct
+ollama pull qwen3:1.7b
 ollama pull embeddinggemma
 ```
 
@@ -38,7 +39,7 @@ systemctl --user restart fgv-ollama fgv-backend fgv-frontend
 journalctl --user -u fgv-backend -f
 ```
 
-Os serviços reiniciam automaticamente em caso de falha e são iniciados junto à sessão do usuário.
+Os serviços reiniciam automaticamente em caso de falha e são iniciados junto à sessão do usuário. A análise de editais usa `AI_NOTICE_MODEL=qwen3:1.7b`: o conteúdo programático é separado localmente e somente metadados, datas e regras passam por uma chamada ao modelo.
 
 ## PostgreSQL + PgVector
 
