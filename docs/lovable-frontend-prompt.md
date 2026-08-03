@@ -87,9 +87,67 @@ Formato da resposta:
 - Busca de materiais.
 - Lista com título, tipo, data, status, chunks e tokens.
 - Tela de detalhes do material.
-- Ações: perguntar, resumir, explicar tópico, flashcards, mapa mental, questões e anotações.
+- Organize a área em três abas internas: **Materiais**, **Resumos** e **Perguntas**.
+- Ações nos detalhes: perguntar, resumir, explicar tópico, flashcards, mapa mental, questões e anotações.
 - Chat limpo, semelhante a uma conversa de suporte ou estudo. Não use avatar de robô ou ícone de brilho.
 - Nas respostas, mostre fontes, trechos utilizados e tempo de resposta em uma seção secundária expansível.
+
+### Gerador de resumos personalizados
+
+Na aba **Resumos**, crie uma composição em duas colunas no desktop e uma coluna no mobile.
+
+Na coluna esquerda, mostre:
+
+- seleção de um ou vários documentos com status `READY`;
+- lista com checkbox, título, tipo e quantidade de trechos;
+- seletor do formato do resumo;
+- textarea com o título “O que você quer no resumo?”;
+- placeholder: “Ex.: Resuma apenas os pontos sobre JWT, destaque diferenças importantes e liste pegadinhas de prova.”;
+- contador de até 2.000 caracteres;
+- botão “Gerar resumo”.
+
+Formatos permitidos: `SHORT`, `COMPLETE`, `TECHNICAL`, `BEGINNER`, `ADVANCED`, `MAP`, `CHECKLIST`, `TABLE` e `COMPARISON`.
+
+Na coluna direita, mostre o resumo renderizado como Markdown. Abaixo do conteúdo, inclua uma seção expansível chamada “Documentos e capítulos utilizados”. Não invente fontes no frontend; use somente o array `sources` retornado pela API. Enquanto o modelo local estiver trabalhando, mostre um loading discreto com a mensagem “Lendo os documentos e preparando o resumo...”. A requisição pode levar vários minutos e não deve ser cancelada pelo frontend prematuramente.
+
+Chamada:
+
+```http
+POST /api/materials/summarize
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "materialIds": [1, 2],
+  "type": "TECHNICAL",
+  "request": "Resuma os pontos relacionados a autenticação e compare as abordagens dos documentos."
+}
+```
+
+`materialIds` aceita de 1 a 10 documentos. `request` pode ser omitido ou enviado como `null`; nesse caso, o backend produz um resumo geral. Mantenha compatibilidade com o formato antigo que usa `materialId` para apenas um documento.
+
+Resposta:
+
+```json
+{
+  "content": "# Resumo\n\nConteúdo em Markdown...",
+  "sources": [
+    {
+      "chunkId": 10,
+      "materialId": 1,
+      "materialTitle": "Segurança.pdf",
+      "chapter": "JWT",
+      "content": "Trecho utilizado...",
+      "similarity": 0.91
+    }
+  ]
+}
+```
+
+Se o backend retornar exatamente “Esse assunto não foi encontrado na sua biblioteca.”, apresente essa mensagem como estado informativo normal, não como erro técnico.
 
 APIs principais:
 

@@ -58,6 +58,8 @@ O Compose sobe PostgreSQL, PgVector, Ollama, baixa os modelos e inicia a aplica�
 - `POST /api/study/query`
 - `POST /api/materials/summarize|explain|flashcards|mindmap|questions|notes`
 
+O gerador de resumos aceita um ou vários documentos e um pedido personalizado. Exemplo: `{"materialIds":[1,2],"type":"TECHNICAL","request":"Resuma autenticação e compare as abordagens."}`. A resposta usa exclusivamente trechos dos materiais selecionados.
+
 Uploads aceitos: PDF, DOCX, TXT, Markdown, CSV e HTML, até 25 MB por arquivo. URLs privadas/loopback são rejeitadas para prevenir SSRF.
 
 ## Variáveis
