@@ -10,7 +10,6 @@ Pré-requisitos: JDK 17+, Maven 3.9+, Node 20+ e Ollama.
 ollama serve
 ollama pull qwen3:4b-instruct
 ollama pull qwen3:1.7b
-ollama pull qwen2.5:1.5b-instruct
 ollama pull embeddinggemma
 ```
 
@@ -63,11 +62,25 @@ O Compose sobe PostgreSQL, PgVector, Ollama, baixa os modelos e inicia a aplica�
 
 O gerador de resumos aceita um ou vários documentos e um pedido personalizado. Exemplo: `{"materialIds":[1,2],"type":"TECHNICAL","request":"Resuma autenticação e compare as abordagens."}`. A resposta usa exclusivamente trechos dos materiais selecionados.
 
+### Resumos com NotebookLM (opcional e gratuito)
+
+O projeto inclui uma ponte isolada com `notebooklm-py`. O NotebookLM recebe os documentos completos selecionados, cria um notebook temporário, gera o resumo solicitado e remove o notebook ao terminar. Se a autenticação expirar ou o serviço estiver indisponível, o sistema usa automaticamente o Ollama local.
+
+```bash
+python3 -m venv notebooklm-bridge/.venv
+notebooklm-bridge/.venv/bin/pip install -r notebooklm-bridge/requirements.txt
+notebooklm-bridge/.venv/bin/playwright install chromium
+notebooklm-bridge/.venv/bin/notebooklm login
+notebooklm-bridge/.venv/bin/notebooklm auth check --test --json
+```
+
+Depois do login, execute o backend com `NOTEBOOKLM_ENABLED=true`. O endpoint `GET /api/materials/summarize/provider` informa se a sessão está conectada. `notebooklm-py` é um cliente comunitário para APIs não documentadas do Google; por isso essa integração é opcional e sempre mantém o provedor local como fallback.
+
 Uploads aceitos: PDF, DOCX, TXT, Markdown, CSV e HTML, até 25 MB por arquivo. URLs privadas/loopback são rejeitadas para prevenir SSRF.
 
 ## Variáveis
 
-Por padrão: `AI_PROVIDER=ollama`, `AI_URL=http://localhost:11434`, `AI_MODEL=qwen3:4b-instruct`, `AI_EMBEDDING_MODEL=embeddinggemma` e `AI_TIMEOUT_SECONDS=1800`. Também existem `STORAGE_PATH`, `CORS_ALLOWED_ORIGINS` e, no perfil PostgreSQL, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`. Em máquinas apenas com CPU, o primeiro simulado de cinco questões pode levar vários minutos; o cache torna as próximas consultas imediatas.
+Por padrão: `AI_PROVIDER=ollama`, `AI_URL=http://localhost:11434`, `AI_MODEL=qwen3:4b-instruct`, `AI_QUIZ_MODEL=qwen3:4b-instruct`, `AI_EMBEDDING_MODEL=embeddinggemma` e `AI_TIMEOUT_SECONDS=1800`. Também existem `STORAGE_PATH`, `CORS_ALLOWED_ORIGINS`, `NOTEBOOKLM_ENABLED` e, no perfil PostgreSQL, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`. O cache torna as próximas consultas do mesmo tópico imediatas.
 
 OpenAI permanece opcional para quem quiser: configure `AI_PROVIDER=openai`, `AI_URL=https://api.openai.com/v1`, `AI_MODEL`, `AI_EMBEDDING_MODEL` e `OPENAI_API_KEY`.
 

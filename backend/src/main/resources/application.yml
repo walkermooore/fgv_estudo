@@ -23,7 +23,7 @@ app:
     provider: ${AI_PROVIDER:ollama}
     api-key: ${OPENAI_API_KEY:}
     model: ${AI_MODEL:${OPENAI_MODEL:qwen3:4b-instruct}}
-    quiz-model: ${AI_QUIZ_MODEL:qwen2.5:1.5b-instruct}
+    quiz-model: ${AI_QUIZ_MODEL:qwen3:4b-instruct}
     notice-model: ${AI_NOTICE_MODEL:qwen3:1.7b}
     url: ${AI_URL:${OPENAI_URL:http://localhost:11434}}
     embedding-model: ${AI_EMBEDDING_MODEL:${OPENAI_EMBEDDING_MODEL:embeddinggemma}}
@@ -31,3 +31,9 @@ app:
   vector:
     top-k: 10
     provider: local
+  notebooklm:
+    enabled: ${NOTEBOOKLM_ENABLED:false}
+    python-executable: ${NOTEBOOKLM_PYTHON:../notebooklm-bridge/.venv/bin/python}
+    bridge-script: ${NOTEBOOKLM_BRIDGE:../notebooklm-bridge/notebooklm_bridge.py}
+    storage-path: ${NOTEBOOKLM_STORAGE_PATH:}
+    timeout-seconds: ${NOTEBOOKLM_TIMEOUT_SECONDS:600}

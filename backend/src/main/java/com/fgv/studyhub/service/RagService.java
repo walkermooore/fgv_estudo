@@ -11,7 +11,7 @@ import java.util.*;
 @Service @RequiredArgsConstructor
 public class RagService {
  private static final int MAX_SUMMARY_SOURCES=12;
- private final SemanticSearchService semantic; private final AiGateway ai; private final MaterialService materials; private final StudyChunkRepository chunks; private final JsonResponseParser parser; private final QuestionValidator questionValidator;
+ private final SemanticSearchService semantic; private final AiGateway ai; private final MaterialService materials; private final StudyChunkRepository chunks; private final JsonResponseParser parser; private final QuestionValidator questionValidator; private final NotebookLmSummaryService notebookLm;
  public StudyQueryResponseDTO query(String question){long start=System.nanoTime();var sources=semantic.search(question);String answer=sources.isEmpty()?"Esse assunto não foi encontrado na sua biblioteca.":ai.chat(RagPrompts.grounded("Responda à pergunta: "+question,sources));return new StudyQueryResponseDTO(answer,sourceNames(sources),sources,(System.nanoTime()-start)/1_000_000);}
  public MarkdownResponseDTO summarize(SummaryRequestDTO request){
   var materialIds=summaryMaterialIds(request);
@@ -19,7 +19,9 @@ public class RagService {
   var sources=customRequest.isBlank()?summarySources(materialIds):relevantSummarySources(materialIds,customRequest);
   if(sources.isEmpty())return new MarkdownResponseDTO("Esse assunto não foi encontrado na sua biblioteca.",List.of());
   String task="Crie um resumo do tipo %s, organizado em Markdown.%s Não acrescente informações externas e deixe claro quando algum ponto solicitado não estiver nos documentos.".formatted(request.type(),customRequest.isBlank()?"":" Atenda a este pedido específico do usuário: \""+customRequest+"\".");
-  return new MarkdownResponseDTO(ai.chat(RagPrompts.grounded(task,sources)),sources);
+  var selectedMaterials=materialIds.stream().map(materials::entity).toList();
+  String content=notebookLm.summarize(request,selectedMaterials).orElseGet(()->ai.chat(RagPrompts.grounded(task,sources)));
+  return new MarkdownResponseDTO(content,sources);
  }
  public MarkdownResponseDTO explain(ExplainRequestDTO r){materials.entity(r.materialId());var sources=semantic.search(r.topic(),r.materialId(),10);String teacher="Explain the topic \"%s\" in teacher mode. Include all sections: beginner explanation, intermediate explanation, advanced explanation, examples, analogy, real cases, common mistakes, FGV exam traps, and final summary.".formatted(r.topic());return new MarkdownResponseDTO(ai.chat(RagPrompts.grounded(teacher,sources)),sources);}
  public MarkdownResponseDTO materialMarkdown(Long id,String task){var sources=allSources(id);return new MarkdownResponseDTO(ai.chat(RagPrompts.grounded(task,sources)),sources);}

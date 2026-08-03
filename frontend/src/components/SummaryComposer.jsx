@@ -25,6 +25,11 @@ export default function SummaryComposer({ materials }) {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [provider, setProvider] = useState(null)
+
+  useEffect(() => {
+    materialApi.summaryProvider().then(setProvider).catch(() => setProvider(null))
+  }, [])
 
   useEffect(() => {
     if (selectedIds.length === 0 && readyMaterials.length > 0) {
@@ -79,6 +84,7 @@ export default function SummaryComposer({ materials }) {
       <form onSubmit={submit} className="panel p-5 sm:p-6">
         <h2 className="flex items-center gap-2 text-lg font-bold"><BookOpen size={20} /> Novo resumo</h2>
         <p className="mt-1 text-sm text-slate-500">Escolha as fontes e diga o que deseja extrair delas.</p>
+        {provider && <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{provider.authenticated ? 'NotebookLM conectado' : 'Resumo local gratuito ativo'} · fallback automático</p>}
 
         <fieldset className="mt-6">
           <legend className="mb-2 flex w-full justify-between text-sm font-bold">

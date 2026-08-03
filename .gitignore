@@ -4,4 +4,6 @@ data/
 backend/target/
 frontend/node_modules/
 frontend/dist/
+notebooklm-bridge/.venv/
+notebooklm-bridge/__pycache__/
 *.log

@@ -7,7 +7,8 @@ import com.fgv.studyhub.validation.QuestionValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
-@Service @RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j;
+@Service @RequiredArgsConstructor @Slf4j
 public class AiGeneratorService {
  private final AiGateway ai; private final JsonResponseParser parser; private final QuestionValidator validator; private final AppProperties properties;
  public List<AiQuestionDTO> generate(String topicName,int amount){
@@ -44,6 +45,21 @@ A explanation deve obrigatoriamente explicar:
 - utilizar quebras de linha (\\n) para separar as explicações.
 
 Não escreva nenhum texto antes nem depois do JSON.""".formatted(amount,topicName);
-  AiResponseDTO response=parser.parseFirstObject(ai.chatQuestions(prompt,properties.ai().quizModel(),amount),AiResponseDTO.class); if(response.questions()==null||response.questions().size()!=amount)throw new AiParsingException("AI must return exactly "+amount+" questions");response.questions().forEach(validator::validate);return response.questions();
+  AiParsingException lastFailure=null;
+  for(int attempt=1;attempt<=2;attempt++){
+   try{
+    AiResponseDTO response=parser.parseFirstObject(ai.chatQuestions(prompt,properties.ai().quizModel(),amount),AiResponseDTO.class);
+    if(response.questions()==null||response.questions().size()!=amount)throw new AiParsingException("AI must return exactly "+amount+" questions");
+    var normalized=response.questions().stream().map(this::normalizeFormatting).toList();
+    normalized.forEach(validator::validate);
+    return normalized;
+   }catch(AiParsingException exception){lastFailure=exception;log.warn("Question generation attempt {} returned invalid content: {}",attempt,exception.getMessage());}
+  }
+  throw new AiParsingException("A IA local não conseguiu produzir questões válidas após duas tentativas",lastFailure);
+ }
+ private AiQuestionDTO normalizeFormatting(AiQuestionDTO question){
+  if(question==null||question.explanation()==null)return question;
+  String explanation=question.explanation().replace("\\n","\n").replaceAll("(?i)\\s+(?=(?:alternativa\\s*)?[A-E1-5][).:\\-]\\s*)","\n").trim();
+  return new AiQuestionDTO(question.statement(),question.options(),question.correctIndex(),explanation);
  }
 }

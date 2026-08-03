@@ -35,9 +35,9 @@ public class OllamaGateway implements AiGateway {
 
     @Override
     public String chatQuestions(String prompt, String model, int amount) {
-        int predictionLimit = Math.min(4096, Math.max(650, amount * 550));
+        int predictionLimit = Math.min(3500, Math.max(650, amount * 500));
         Map<String, Object> body = chatBody(prompt, model,
-                Map.of("temperature", 0.2, "num_ctx", 4096, "num_predict", predictionLimit, "num_thread", 4));
+                Map.of("temperature", 0.15, "num_ctx", 4096, "num_predict", predictionLimit, "num_thread", 4));
         body.put("format", questionFormat(amount));
         return requestChat(body);
     }
@@ -61,15 +61,15 @@ public class OllamaGateway implements AiGateway {
 
     private Map<String, Object> questionFormat(int amount) {
         Map<String, Object> statement = Map.of("type", "string", "minLength", 10, "maxLength", 800);
-        Map<String, Object> option = Map.of("type", "string", "minLength", 1, "maxLength", 300);
-        Map<String, Object> explanation = Map.of("type", "string", "minLength", 20, "maxLength", 900);
+        Map<String, Object> option = Map.of("type", "string", "minLength", 8, "maxLength", 300);
+        Map<String, Object> explanation = Map.of("type", "string", "minLength", 100, "maxLength", 1800);
         Map<String, Object> question = Map.of(
                 "type", "object",
                 "additionalProperties", false,
                 "required", List.of("statement", "options", "correctIndex", "explanation"),
                 "properties", Map.of(
                         "statement", statement,
-                        "options", Map.of("type", "array", "minItems", 5, "maxItems", 5, "items", option),
+                        "options", Map.of("type", "array", "minItems", 5, "maxItems", 5, "uniqueItems", true, "items", option),
                         "correctIndex", Map.of("type", "integer", "minimum", 0, "maximum", 4),
                         "explanation", explanation
                 )
