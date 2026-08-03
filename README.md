@@ -10,6 +10,7 @@ Pré-requisitos: JDK 17+, Maven 3.9+, Node 20+ e Ollama.
 ollama serve
 ollama pull qwen3:4b-instruct
 ollama pull qwen3:1.7b
+ollama pull qwen2.5:1.5b-instruct
 ollama pull embeddinggemma
 ```
 

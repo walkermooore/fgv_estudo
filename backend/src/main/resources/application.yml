@@ -23,6 +23,7 @@ app:
     provider: ${AI_PROVIDER:ollama}
     api-key: ${OPENAI_API_KEY:}
     model: ${AI_MODEL:${OPENAI_MODEL:qwen3:4b-instruct}}
+    quiz-model: ${AI_QUIZ_MODEL:qwen2.5:1.5b-instruct}
     notice-model: ${AI_NOTICE_MODEL:qwen3:1.7b}
     url: ${AI_URL:${OPENAI_URL:http://localhost:11434}}
     embedding-model: ${AI_EMBEDDING_MODEL:${OPENAI_EMBEDDING_MODEL:embeddinggemma}}
